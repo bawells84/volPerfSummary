@@ -3,7 +3,7 @@ from types import DictType
 
 class RAIDVolume(DictType):
     
-    global INFO, CACHE, IOSTAT, VGINFO, IOSTAT_REQ
+    global INFO, CACHE, IOSTAT, VGINFO
     
     INFO = int(0)
     CACHE = int(1)
@@ -30,18 +30,6 @@ class RAIDVolume(DictType):
                             'flush_mod': "",
                             'warn_mod': "",
                             'cache_block': "",
-        }
-        
-        self.vol[IOSTAT_REQ] = {
-                            'sm_reads': "",
-                            'sm_writes': "",
-                            'sm_writesame': "",
-                            'lg_reads': "",
-                            'lg_writes': "",
-                            'lg_writesame': "",
-                            'comp_write': "",
-                            'total': "",
-                            'cache_hits': "" 
         }
         
         self.vol[IOSTAT] = {
