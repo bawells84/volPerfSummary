@@ -1,27 +1,37 @@
+import StringIO
 from regexes import *
 from types import DictType
 
+# Metaclass impl for iterator 
+class IterInstancesVG(type):
+    def __iter__(cls):
+        return iter(cls._instances)
+
 class RAIDVolume(DictType):
     
+    __metaclass__ = IterInstancesVG
     global INFO, CACHE, IOSTAT, VGINFO
-    
+        
+    _instances = []
+        
     INFO = int(0)
     CACHE = int(1)
     IOSTAT = int(2)
-    IOSTAT_REQ = int(3)
-    VGINFO = int(4)
+    VGINFO = int(3)
     
-    def __init__(self, SSID):
-        
+    def __init__(self, buffer):
+
         self.vol = dict() 
         self.vol[INFO] = {
-                            'ssid': SSID,
+                            'ssid': "",
                             'user_label': "",
                             'capacity': "",
                             'blocksize': "",
                             'segment_size': "",
                             'stripe_size': "",
                             'pre_read': "",
+                            'owner': "",
+                            'preferred_owner': ""
         }
         
         self.vol[CACHE] = {
@@ -48,7 +58,19 @@ class RAIDVolume(DictType):
                             'media_type': ""
         }
         
-    def populateWithBuffer(self, buffer):
+        volType = vol_ssid_type.search(buffer)
+        
+        if volType:
+            
+            if volType.group(2) == "RAIDVolume":
+                ssid = volType.group(1)
+                self.populateWithBuffer(buffer, ssid)
+                RAIDVolume._instances.append(self)
+            else:
+                del self
+                
+    
+    def populateWithBuffer(self, buffer, ssid):
         
         user_label = vol_user_label.search(buffer)
         capacity = vol_capacity.search(buffer)
@@ -56,13 +78,18 @@ class RAIDVolume(DictType):
         seg_size = vol_segment_size.search(buffer)
         stripe_sz = vol_stripe_size.search(buffer)
         pre_rd = vol_pre_read.search(buffer)
+        owner = vol_ownership.search(buffer)
+        pref_own = vol_pref_ownership.search(buffer)
         
+        self.vol[INFO]['ssid'] = ssid
         self.vol[INFO]['user_label'] = user_label.group(1)
         self.vol[INFO]['capacity'] = capacity.group(1)
         self.vol[INFO]['blocksize'] = blksize.group(1)
         self.vol[INFO]['segment_size'] = seg_size.group(1)
         self.vol[INFO]['stripe_size'] = stripe_sz.group(1)
         self.vol[INFO]['pre_read'] = pre_rd.group(1)
+        self.vol[INFO]['owner'] = owner.group(1)
+        self.vol[INFO]['preferred_owner'] = pref_own.group(1)
         
         rd_ahead = vol_cache_read_ahead.search(buffer)
         fast_wr = vol_cache_fast_write.search(buffer)
@@ -97,7 +124,8 @@ class RAIDVolume(DictType):
         self.vol[IOSTAT]['blocks'] = {
                                         'sm_reads': blocks.group(1),
                                         'sm_writes': blocks.group(2),
-                                        'sm_writesame': blocks.group(3),
+                                        'sm_writesame': blocks.group(3)
+                                        ,
                                         'lg_reads': blocks.group(4), 
                                         'lg_writes': blocks.group(5),
                                         'lg_writesame': blocks.group(6),
@@ -146,38 +174,116 @@ class RAIDVolume(DictType):
         self.vol[VGINFO]['drive_count'] = drive_cnt.group(1)
         self.vol[VGINFO]['boundary'] = boundary.group(1)
         self.vol[VGINFO]['media_type'] = media_type.group(1)
-    
-    def getVolInfo(self):
         
+    def getSSID(self, dec):
+        # Dec is a 'bool' to return a base 10 version of the SSID
+        if dec == True:
+            s = str(int(self.vol[INFO]['ssid'], 16))
+            return s
+        else:
+            return self.vol[INFO]['ssid']
+    
+    def iterVolInfo(self):
+        
+        pass
+    
+    
+    def printVolInfo(self):
+        
+        ssid_hex = self.getSSID(False)
+        ssid_dec = self.getSSID(True)
+        
+        print "SSID       : " + ssid_dec + " (" + ssid_hex + ")"
         print "User Label : " + self.vol[INFO]['user_label']
         print "Capacity   : " + self.vol[INFO]['capacity']
         print "BlockSize  : " + self.vol[INFO]['blocksize']
         print "Stripe Size: " + self.vol[INFO]['stripe_size']
         print "Pre-Read   : " + self.vol[INFO]['pre_read']
+        print "Cur. Owner : " + self.vol[INFO]['owner']
+        print "Pref Owner : " + self.vol[INFO]['preferred_owner']
    
-    def getVolCache(self):    
+    def printVolCache(self):    
         
         print "Read Ahead      : " + self.vol[CACHE]['read_ahead']
         print "Fast Write      : " + self.vol[CACHE]['fast_write']
         print "Cache Flush Mod.: " + self.vol[CACHE]['flush_mod']
         print "Min. Warn Mod.  : " + self.vol[CACHE]['warn_mod']
         k = int(self.vol[CACHE]['cache_block']) * 512 / 1024
-        print "Cache Block Size: " + str(k), "K"
+        print "Cache Block Size: " + str(k) + "K"
     
-    def getVolVGInfo(self):
+    def printVolVGInfo(self):
         
         print "VG Label    : " + self.vol[VGINFO]['vg_label']
         print "Drive Count : " + self.vol[VGINFO]['drive_count']
         print "Boundary    : " + self.vol[VGINFO]['boundary']
         print "Media Type  : " + self.vol[VGINFO]['media_type']
         
+    def printIOStats(self):
+        pass
+    
     def getValueWithKeys(self, cat, key):
         
         return self.vol[cat][key]
     
     def getIOStatWithKeys(self, cat, key):
         
-        return self.vol[IOSTAT][cat][key] 
+        return self.vol[IOSTAT][cat][key]
+    
+def buildRAIDVolumes(buffer):
+    # Generate all RAIDVolume objects with a passed in buffer
+    # buffer should be open file object
+    buffer.seek(0)
+    buf = buffer.readlines()
+    # Be Kind, Rewind!
+    buffer.seek(0)
+    
+    temp = StringIO.StringIO()
+    start = False
+    
+    for line in buf:
         
+        start_evfShow = executing.search(line)
+        
+        if start_evfShow:
+
+            if start == True:
+                if start_evfShow.group(1) == "evfShowVol":
+                    
+                    evfShow = temp.getvalue()
+                    match = vol_ownership.search(evfShow)
+                    
+                    if match.group(1) == "This controller":
+                        RAIDVolume(evfShow)
+                        temp = StringIO.StringIO()
+                    else:
+                        temp = StringIO.StringIO()
+                        
+                else:
+                    evfShow = temp.getvalue()
+                    match = vol_ownership.search(evfShow)
+                    
+                    if match.group(1) == "This controller":
+                        start = False
+                        RAIDVolume(evfShow)
+                        temp = StringIO.StringIO()
+                    else:
+                        start = False
+                        temp = StringIO.StringIO()
+        
+            elif start == False:
+                if start_evfShow.group(1) == "evfShowVol":
+                    start = True
+                
+        elif start == True:
+            temp.write(line)
+            
+    del buf
+
+def getRAIDVolumeInstances():
+    # Length returned is entries + 1
+    c = len(RAIDVolume.instances)
+    return c
+
+
     
     
