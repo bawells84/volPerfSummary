@@ -273,7 +273,7 @@ def build_raid_volumes(statecapture):
             
     del buf
 
-def getRAIDVolumeInstances():
+def get_raid_volume_instances():
     # Length returned is entries + 1
     c = len(RAIDVolume.instances)
     return c
