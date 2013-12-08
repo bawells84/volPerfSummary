@@ -72,6 +72,8 @@ class RAIDVolume(DictType):
             else:
                 del self
 
+    # Called by init to populate the dicts with data from the evfShow output
+
     def populate_with_buffer(self, buf, ssid):
         
         user_label = vol_user_label.search(buf)
@@ -173,7 +175,11 @@ class RAIDVolume(DictType):
         self.vol[VGINFO]['drive_count'] = drive_cnt.group(1)
         self.vol[VGINFO]['boundary'] = boundary.group(1)
         self.vol[VGINFO]['media_type'] = media_type.group(1)
-        
+
+    # Return a str of the RAIDVolume instance's SSID. dec is a bool, if True
+    # value will be in base 10, if False it will be the stored SSID
+    # in hex.
+
     def get_ssid(self, dec):
         # Dec is a 'bool' to return a base 10 version of the SSID
         if dec:
@@ -181,7 +187,9 @@ class RAIDVolume(DictType):
             return s
         else:
             return self.vol[INFO]['ssid']
-    
+
+    # Print the RAIDVolume instance's INFO
+
     def print_vol_info(self):
         
         ssid_hex = self.get_ssid(False)
@@ -195,7 +203,9 @@ class RAIDVolume(DictType):
         print "Pre-Read   : " + self.vol[INFO]['pre_read']
         print "Cur. Owner : " + self.vol[INFO]['owner']
         print "Pref Owner : " + self.vol[INFO]['preferred_owner']
-   
+
+    # Print the RAIDVolume instance's CACHE
+
     def print_vol_cache(self):
         
         print "Read Ahead      : " + self.vol[CACHE]['read_ahead']
@@ -204,7 +214,8 @@ class RAIDVolume(DictType):
         print "Min. Warn Mod.  : " + self.vol[CACHE]['warn_mod']
         k = int(self.vol[CACHE]['cache_block']) * 512 / 1024
         print "Cache Block Size: " + str(k) + "K"
-    
+
+    # Print the RAIDVolume instance's VGINFO
     def print_vol_vginfo(self):
         
         print "VG Label    : " + self.vol[VGINFO]['vg_label']
@@ -214,11 +225,17 @@ class RAIDVolume(DictType):
         
     def print_vol_iostats(self):
         pass
-    
+
+    # Direct access to a RAIDVolume instance's internal dicts
+    # by passing cat (INFO, CACHE, VGINFO) and relative key.
+
     def get_value_with_keys(self, cat, key):
         
         return self.vol[cat][key]
-    
+
+    # Direct access to a RAIDVolume instrance's IOSTAT dict
+    # by passing an IOSTAT category and relative key.
+
     def get_iostats_with_keys(self, cat, key):
         
         return self.vol[IOSTAT][cat][key]

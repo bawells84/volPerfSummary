@@ -87,6 +87,7 @@ def get_vginfo(statecapture):
     start_found = False
     statecapture.seek(0)
     buf = statecapture.readlines()
+    statecapture.seek(0)
 
     temp = StringIO.StringIO()
 
