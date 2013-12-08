@@ -277,7 +277,3 @@ def getRAIDVolumeInstances():
     # Length returned is entries + 1
     c = len(RAIDVolume.instances)
     return c
-
-
-    
-    
