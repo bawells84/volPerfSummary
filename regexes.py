@@ -6,7 +6,7 @@ find_executing = re.compile("Executing\s(\w+)\((\d+)", re.MULTILINE)
 find_ionshow12 = re.compile("Executing\sionShow\(12,0,\S*\son\scontroller\s(A|B):", re.MULTILINE)
 
 ionshow12_drive = re.compile(
-    "\s*(\w{8})\st(\d+),s(\d+)\s*(SASdr|FCdr|SATAdr|FC2Satdr)\s*(Open|Closed)\s*(\d+)\s*\S+\s*(\d)\s*\w+\s*(\d+)\s*\d+\s*\d+\sDisk\s*(\d+)\s*(\d+)\s(\w+)", re.MULTILINE)
+    "\s*(\w{8})\s*t(\d+),s(\d+)\s*(SASdr|FCdr|SATAdr|FC2Satdr)\s*(Open|Closed)\s*(\d+)\s*\S+\s*(\d)\s*\w+\s*(\d+)\s*\d+\s*\d+\sDisk\s*(\d+)\s*(\d+)\s(\w+)", re.MULTILINE)
 
 ## ionShow 99
 find_ionshow99_a = re.compile("Executing\sionShow\(99,\S*\son\scontroller\s(A):", re.MULTILINE)
@@ -23,7 +23,7 @@ find_luall0 = re.compile("->\sluall\s0", re.MULTILINE)
 #mg:    1      2,3         4   567   8 9 10 11 12  13   14   15     16        17      18
 
 luall0_drive = re.compile(
-    "\s{2}(\w{8})\st(\d{1,2}),s(\d{1,2})\s*(SASdr|FCdr|SATAdr|FC2Satdr)\s*:(\+|d)(\+|d|-|x)(\+|-|\s{1})\s*:\s*(\*|\+|D|d|-|x|\s{1})\s*(\*|\+|D|d|-|x|\s{1})\s*(\*|\+|D|d|-|x|\s{1})\s*(\*|\+|D|d|-|x|\s{1})\s*(\*|\+|D|d|-|x|\s{1})\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\w*", re.MULTILINE)
+    "\s*(\w{8})\s*t(\d{1,2}),s(\d{1,2})\s*(SASdr|FCdr|SATAdr|FC2Satdr)\s*:(\+|d)(\+|d|-|x)(\+|-|\s{1})\s*:\s*(\*|\+|D|d|-|x|\s{1})\s*(\*|\+|D|d|-|x|\s{1})\s*(\*|\+|D|d|-|x|\s{1})\s*(\*|\+|D|d|-|x|\s{1})\s*(\*|\+|D|d|-|x|\s{1})\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\w*", re.MULTILINE)
 
 ## luall 2
 find_luall2 = re.compile('->\sluall\s2', re.MULTILINE)
@@ -34,7 +34,7 @@ find_luall2 = re.compile('->\sluall\s2', re.MULTILINE)
 #mg:    1     2,3          4       5      6    7    8    9     10   11   12   13  14   15   16    17   18   19   20   21
 
 luall2_drive = re.compile(
-    "\s{2}(\w{8})\st(\d{1,2}),s(\d{1,2})\s*:\s*(\d+)\s*:\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s*(\d)\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)", re.MULTILINE)
+    "\s*(\w{8})\s*t(\d{1,2}),s(\d{1,2})\s*:\s*(\d+)\s*:\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s*(\d)\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)", re.MULTILINE)
 
 ## luall 3
 find_luall3 = re.compile("->\sluall\s3", re.MULTILINE)
@@ -43,7 +43,7 @@ find_luall3 = re.compile("->\sluall\s3", re.MULTILINE)
 #    Devnum Location :  #Success BlksXfered ART(uSec) MRT(uSec) :  #Success BlksXfered ART(uSec) MRT(uSec) :#Errs IO/s  BsyTm(milliSec)
 #mg:   1     2,3           4        5         6          7            8        9          10        11       12   13        14
 luall3_drive = re.compile(
-    "\s{2}(\w{8})\st(\d{1,2}),s(\d{1,2})\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s+(\d+)", re.MULTILINE)
+    "\s*(\w{8})\s*t(\d{1,2}),s(\d{1,2})\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s+(\d+)", re.MULTILINE)
 
 ## vdall
 

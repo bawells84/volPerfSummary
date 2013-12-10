@@ -3,13 +3,13 @@ from volStruct import *
 # Metaclass impl for iterator over instances list
 
 
-class IterInstancesVol(type):
+class IterInstancesVG(type):
     def __iter__(cls):
         return iter(cls._instances)
 
 
 class VolumeGroup():
-    __metaclass__ = IterInstancesVol
+    __metaclass__ = IterInstancesVG
     _instances = []
 
     def __init__(self, buf):
@@ -27,7 +27,7 @@ class VolumeGroup():
             self.pieces = dict()
             self.volumes = []
 
-            self.add_pieces(buffer)
+            self.add_pieces(buf)
 
             VolumeGroup._instances.append(self)
 
@@ -94,7 +94,7 @@ def get_vginfo(statecapture):
     for line in buf:
 
         cmd_start = find_vdmShowVGInfo.search(line)
-        cmd_end = executing.search(line)
+        cmd_end = find_executing.search(line)
 
         if not start_found:
             if cmd_start:

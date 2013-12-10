@@ -102,12 +102,13 @@ def get_ionshow12(statecapture):
 
         if start and not start_found:
             start_found = True
+            continue
+
+        if start_found and end:
+            return ionshow12.getvalue()
 
         elif start_found:
             ionshow12.write(line)
-
-        elif end:
-            return ionshow12.getvalue()
 
 
 # Use passed in ionShow 12 output to generate drive objects
@@ -153,12 +154,13 @@ def populate_drives_a(statecapture):
 
         if start and not start_found:
             start_found = True
+            continue
+
+        if start_found and end:
+            break
 
         elif start_found:
             ionshow99.write(line)
-
-        elif end:
-            break
 
     process_luall0(ionshow99.getvalue(), ctrl)
     process_luall2(ionshow99.getvalue(), ctrl)
@@ -180,12 +182,13 @@ def populate_drives_b(statecapture):
 
         if start and not start_found:
             start_found = True
+            continue
+
+        if start_found and end:
+            break
 
         elif start_found:
             ionshow99.write(line)
-
-        elif end:
-            break
 
     process_luall0(ionshow99.getvalue(), ctrl)
     process_luall2(ionshow99.getvalue(), ctrl)
@@ -197,7 +200,7 @@ def populate_drives_b(statecapture):
 
 def process_luall0(buf, ctrl_slot):
 
-    luall0 = StringIO.StringIO()
+    temp = StringIO.StringIO()
     start_found = False
 
     for line in StringIO.StringIO(buf):
@@ -207,14 +210,17 @@ def process_luall0(buf, ctrl_slot):
 
         if start and not start_found:
             start_found = True
+            continue
 
-        elif start_found:
-            luall0.write(line)
-
-        elif end:
+        if start_found and end:
+            luall0 = temp.getvalue()
+            del temp
             break
 
-    for line in luall0:
+        elif start_found:
+            temp.write(line)
+
+    for line in StringIO.StringIO(luall0):
 
         match = luall0_drive.search(line)
 
@@ -260,7 +266,7 @@ def process_luall0(buf, ctrl_slot):
 
 def process_luall2(buf, ctrl_slot):
 
-    luall2 = StringIO.StringIO()
+    temp = StringIO.StringIO()
     start_found = False
 
     for line in StringIO.StringIO(buf):
@@ -270,14 +276,17 @@ def process_luall2(buf, ctrl_slot):
 
         if start and not start_found:
             start_found = True
+            continue
 
-        elif start_found:
-            luall2.write(line)
-
-        elif end:
+        if start_found and end:
+            luall2 = temp.getvalue()
+            del temp
             break
 
-    for line in luall2:
+        elif start_found:
+            temp.write(line)
+
+    for line in StringIO.StringIO(luall2):
 
         match = luall2_drive.search(line)
 
@@ -332,7 +341,7 @@ def process_luall2(buf, ctrl_slot):
 
 def process_luall3(buf, ctrl_slot):
 
-    luall3 = StringIO.StringIO()
+    temp = StringIO.StringIO()
     start_found = False
 
     for line in StringIO.StringIO(buf):
@@ -342,14 +351,17 @@ def process_luall3(buf, ctrl_slot):
 
         if start and not start_found:
             start_found = True
+            continue
 
-        elif start_found:
-            luall3.write(line)
-
-        elif end:
+        if start_found and end:
+            luall3 = temp.getvalue()
+            del temp
             break
 
-    for line in luall3:
+        elif start_found:
+            temp.write(line)
+
+    for line in StringIO.StringIO(luall3):
 
         match = luall3_drive.search(line)
 

@@ -5,14 +5,14 @@ from types import DictType
 # Metaclass impl for iterator
 
 
-class IterInstancesVG(type):
+class IterInstancesVol(type):
     def __iter__(cls):
         return iter(cls._instances)
 
 
 class RAIDVolume(DictType):
     
-    __metaclass__ = IterInstancesVG
+    __metaclass__ = IterInstancesVol
     global INFO, CACHE, IOSTAT, VGINFO
         
     _instances = []
@@ -66,7 +66,7 @@ class RAIDVolume(DictType):
             
             if voltype.group(2) == "RAIDVolume":
                 ssid = voltype.group(1)
-                self.populate_with_buffer(buffer, ssid)
+                self.populate_with_buffer(buf, ssid)
                 RAIDVolume._instances.append(self)
             else:
                 del self
@@ -251,7 +251,7 @@ def build_raid_volumes(statecapture):
     
     for line in buf:
         
-        start_evfshow = executing.search(line)
+        start_evfshow = find_executing.search(line)
         
         if start_evfshow:
 
@@ -292,3 +292,10 @@ def get_raid_volume_instances():
     # Length returned is entries + 1
     c = len(RAIDVolume.instances)
     return c
+
+def print_all_volumes():
+
+    for v in RAIDVolume._instances:
+        v.print_vol_info()
+        v.print_vol_cache()
+        v.print_vol_vginfo()
