@@ -111,9 +111,13 @@ def get_ionshow12(statecapture):
             ionshow12.write(line)
 
 
-# Use passed in ionShow 12 output to generate drive objects
+# Use passed in state-capture-data.txt to generate drive objects
+#  - Calls state-capture-data to get_ionshow12() to get drive list
+#  - Calls populate_drives_by_ctrl() to add drive data
 
-def build_drives(buf):
+def build_drives(statecapture):
+
+    buf = get_ionshow12(statecapture)
 
     for line in StringIO.StringIO(buf):
 
@@ -138,57 +142,49 @@ def build_drives(buf):
         else:
             continue
 
+    populate_drives_by_ctrl(statecapture, 'a')
+    populate_drives_by_ctrl(statecapture, 'b')
 
-def populate_drives_a(statecapture):
 
-    ctrl = 'a'
+def populate_drives_by_ctrl(statecapture, ctrl):
+
     ionshow99 = StringIO.StringIO()
     start_found = False
-
     statecapture.seek(0)
 
-    for line in statecapture:
+    if ctrl is 'a':
 
-        start = find_ionshow99_a.search(line)
-        end = find_executing.search(line)
+        for line in statecapture:
 
-        if start and not start_found:
-            start_found = True
-            continue
+            start = find_ionshow99_a.search(line)
+            end = find_executing.search(line)
 
-        if start_found and end:
-            break
+            if start and not start_found:
+                start_found = True
+                continue
 
-        elif start_found:
-            ionshow99.write(line)
+            if start_found and end:
+                break
 
-    process_luall0(ionshow99.getvalue(), ctrl)
-    process_luall2(ionshow99.getvalue(), ctrl)
-    process_luall3(ionshow99.getvalue(), ctrl)
+            elif start_found:
+                ionshow99.write(line)
 
+    elif ctrl is 'b':
 
-def populate_drives_b(statecapture):
+        for line in statecapture:
 
-    ctrl = 'b'
-    ionshow99 = StringIO.StringIO()
-    start_found = False
+            start = find_ionshow99_b.search(line)
+            end = find_executing.search(line)
 
-    statecapture.seek(0)
+            if start and not start_found:
+                start_found = True
+                continue
 
-    for line in statecapture:
+            if start_found and end:
+                break
 
-        start = find_ionshow99_b.search(line)
-        end = find_executing.search(line)
-
-        if start and not start_found:
-            start_found = True
-            continue
-
-        if start_found and end:
-            break
-
-        elif start_found:
-            ionshow99.write(line)
+            elif start_found:
+                ionshow99.write(line)
 
     process_luall0(ionshow99.getvalue(), ctrl)
     process_luall2(ionshow99.getvalue(), ctrl)
@@ -230,7 +226,7 @@ def process_luall0(buf, ctrl_slot):
 
                 if d.devnum == match.group(1):
 
-                    if ctrl_slot == 'a':
+                    if ctrl_slot is 'a':
 
                         d.ctrla[IOCOUNT]['queue_depth'] = match.group(13)
                         d.ctrla[IOCOUNT]['queued'] = match.group(14)
@@ -244,7 +240,7 @@ def process_luall0(buf, ctrl_slot):
                         d.ctrla[REDUNDANCY]['chn3_state'] = match.group(11)
                         d.ctrla[PERFORMANCE]['old_cmd_age'] = match.group(18)
 
-                    elif ctrl_slot == 'b':
+                    elif ctrl_slot is 'b':
 
                         d.ctrlb[IOCOUNT]['queue_depth'] = match.group(13)
                         d.ctrlb[IOCOUNT]['queued'] = match.group(14)
@@ -296,7 +292,7 @@ def process_luall2(buf, ctrl_slot):
 
                 if d.devnum == match.group(1):
 
-                    if ctrl_slot == 'a':
+                    if ctrl_slot is 'a':
 
                         d.ctrla[ERRCOUNT]['ch_errs'] = match.group(5)
                         d.ctrla[ERRCOUNT]['hid_abts'] = match.group(6)
@@ -316,7 +312,7 @@ def process_luall2(buf, ctrl_slot):
                         d.ctrla[ERRCOUNT]['aca_actv'] = match.group(20)
                         d.ctrla[ERRCOUNT]['abort'] = match.group(21)
 
-                    elif ctrl_slot == 'b':
+                    elif ctrl_slot is 'b':
 
                         d.ctrlb[ERRCOUNT]['ch_errs'] = match.group(5)
                         d.ctrlb[ERRCOUNT]['hid_abts'] = match.group(6)
@@ -371,7 +367,7 @@ def process_luall3(buf, ctrl_slot):
 
                 if d.devnum == match.group(1):
 
-                    if ctrl_slot == 'a':
+                    if ctrl_slot is 'a':
 
                         d.ctrla[IOCOUNT]['r_success'] = match.group(4)
                         d.ctrla[IOCOUNT]['r_blks_xfer'] = match.group(5)
@@ -383,7 +379,7 @@ def process_luall3(buf, ctrl_slot):
                         d.ctrla[PERFORMANCE]['w_mrt'] = match.group(11)
                         d.ctrla[PERFORMANCE]['bsy_time'] = match.group(14)
 
-                    elif ctrl_slot == 'b':
+                    elif ctrl_slot is 'b':
 
                         d.ctrlb[IOCOUNT]['r_success'] = match.group(4)
                         d.ctrlb[IOCOUNT]['r_blks_xfer'] = match.group(5)
