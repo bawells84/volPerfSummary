@@ -237,7 +237,8 @@ class RAIDVolume(DictType):
     def get_iostats_with_keys(self, cat, key):
         
         return self[IOSTAT][cat][key]
-    
+
+
 def build_raid_volumes(statecapture):
     # Generate all RAIDVolume objects with a passed in buffer
     # buffer should be open file object

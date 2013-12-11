@@ -113,7 +113,7 @@ def get_vginfo(statecapture):
 # to return only the vdmShowVGInfo output to parse.
 
 
-def create_volume_groups(statecapture):
+def build_volume_groups(statecapture):
     buf = get_vginfo(statecapture)
     temp = StringIO.StringIO()
     start = False

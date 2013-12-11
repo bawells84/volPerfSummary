@@ -73,6 +73,8 @@ class Drive():
     def __init__(self):
 
         self.devnum = ''
+        self.tray = ''
+        self.slot = ''
         self.role = ''
         self.pi = ''
         self.capacity = ''
@@ -87,6 +89,9 @@ class Drive():
 
     def new_with_drive(self, drive_data):
         pass
+
+# Parses out first ionShow 12 output found in the state capture
+# Returns an ionShow 12 blob
 
 
 def get_ionshow12(statecapture):
@@ -129,7 +134,9 @@ def build_drives(statecapture):
 
                 drv = Drive()
                 drv.devnum = match.group(1)
-                drv.role = match.group(2)
+                drv.tray = match.group(2)
+                drv.slot = match.group(3)
+                drv.role = match.group(4)
                 drv.capacity = match.group(6)
                 drv.pi = match.group(7)
                 drv.blksize = match.group(8)
@@ -145,14 +152,18 @@ def build_drives(statecapture):
     populate_drives_by_ctrl(statecapture, 'a')
     populate_drives_by_ctrl(statecapture, 'b')
 
+# Takes a state-capture-data.txt to get ionShow 99 output for each controller (ctrl_slot) and
+# passes this to the process_luall functions to get the relevent data and add them to
+# their respective Drive objects.
 
-def populate_drives_by_ctrl(statecapture, ctrl):
+
+def populate_drives_by_ctrl(statecapture, ctrl_slot):
 
     ionshow99 = StringIO.StringIO()
     start_found = False
     statecapture.seek(0)
 
-    if ctrl is 'a':
+    if ctrl_slot is 'a':
 
         for line in statecapture:
 
@@ -169,7 +180,7 @@ def populate_drives_by_ctrl(statecapture, ctrl):
             elif start_found:
                 ionshow99.write(line)
 
-    elif ctrl is 'b':
+    elif ctrl_slot is 'b':
 
         for line in statecapture:
 
@@ -186,9 +197,9 @@ def populate_drives_by_ctrl(statecapture, ctrl):
             elif start_found:
                 ionshow99.write(line)
 
-    process_luall0(ionshow99.getvalue(), ctrl)
-    process_luall2(ionshow99.getvalue(), ctrl)
-    process_luall3(ionshow99.getvalue(), ctrl)
+    process_luall0(ionshow99.getvalue(), ctrl_slot)
+    process_luall2(ionshow99.getvalue(), ctrl_slot)
+    process_luall3(ionshow99.getvalue(), ctrl_slot)
 
 # Takes ionShow99 output (buf) and a ctrl_slot ('a' or 'b') and populates a Drive object's relative stats
 # from the luall 0 output (ORP, Channel states, queue depth and queued commands, open commands, oldest command age)
@@ -334,6 +345,9 @@ def process_luall2(buf, ctrl_slot):
         else:
             continue
 
+# Takes ionShow99 output (buf) and a ctrl_slot ('a' or 'b') and populates a Drive object's relative stats
+# from the luall 3 output (IO Counts, Performance information)
+
 
 def process_luall3(buf, ctrl_slot):
 
@@ -393,3 +407,24 @@ def process_luall3(buf, ctrl_slot):
 
             else:
                 continue
+
+# Find a drive in the Drive object list by devnum
+# Returns the matching drive object if found
+
+
+def find_drive_by_devnum(devnum):
+
+    for drive in Drive._instances:
+
+        if devnum == drive.devnum:
+            return drive
+
+# Find a drive in the Drive object list by wwn
+# Returns the matching drive object if found
+
+def find_drive_by_wwn(wwn):
+
+    for drive in Drive._instances:
+
+        if wwn == drive.wwn:
+            return drive
