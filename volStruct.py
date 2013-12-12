@@ -71,10 +71,66 @@ class RAIDVolume(DictType):
             else:
                 del self
 
-    # Called by init to populate the dicts with data from the evfShow output
+    @classmethod
+    def build_raid_volumes(cls, statecapture):
+        """
+        Generate all RAIDVolume objects with a passed in buffer
+        buffer should be open file object
+        @param statecapture: A state-capture-data.txt
+        """
+        statecapture.seek(0)
+        buf = statecapture.readlines()
+        # Be Kind, Rewind!
+        statecapture.seek(0)
+
+        temp = StringIO.StringIO()
+        start = False
+
+        for line in buf:
+
+            start_evfshow = find_executing.search(line)
+
+            if start_evfshow:
+
+                if start:
+                    if start_evfshow.group(1) == "evfShowVol":
+
+                        evfshow = temp.getvalue()
+                        match = vol_ownership.search(evfshow)
+
+                        if match.group(1) == "This controller":
+                            RAIDVolume(evfshow)
+                            temp = StringIO.StringIO()
+                        else:
+                            temp = StringIO.StringIO()
+
+                    else:
+                        evfshow = temp.getvalue()
+                        match = vol_ownership.search(evfshow)
+
+                        if match.group(1) == "This controller":
+                            start = False
+                            RAIDVolume(evfshow)
+                            temp = StringIO.StringIO()
+                        else:
+                            start = False
+                            temp = StringIO.StringIO()
+
+                elif not start:
+                    if start_evfshow.group(1) == "evfShowVol":
+                        start = True
+
+            elif start:
+                temp.write(line)
+
+        del buf
 
     def populate_with_buffer(self, buf, ssid):
-        
+        """
+        Populate the RAIDVolume instance's dict
+        @param buf: A buffer of one volume's evfShowVol output
+        @param ssid: The SSID of the RAIDVolume instance to populate
+        """
         user_label = vol_user_label.search(buf)
         capacity = vol_capacity.search(buf)
         blksize = vol_blocksize.search(buf)
@@ -174,22 +230,22 @@ class RAIDVolume(DictType):
         self[VGINFO]['boundary'] = boundary.group(1)
         self[VGINFO]['media_type'] = media_type.group(1)
 
-    # Return a str of the RAIDVolume instance's SSID. dec is a bool, if True
-    # value will be in base 10, if False it will be the stored SSID
-    # in hex.
-
     def get_ssid(self, dec):
-        # Dec is a 'bool' to return a base 10 version of the SSID
+        """
+        Get a RAIDVolume instance's SSID in hex or decimal
+        @param dec: BOOL to return a decimal version of the SSID
+        @return: Volume SSID
+        """
         if dec:
             s = str(int(self[INFO]['ssid'], 16))
             return s
         else:
             return self[INFO]['ssid']
 
-    # Print the RAIDVolume instance's INFO
-
     def print_vol_info(self):
-        
+        """
+        Print a RAIDVolume instance's INFO
+        """
         ssid_hex = self.get_ssid(False)
         ssid_dec = self.get_ssid(True)
         
@@ -202,10 +258,10 @@ class RAIDVolume(DictType):
         print "Cur. Owner : " + self[INFO]['owner']
         print "Pref Owner : " + self[INFO]['preferred_owner']
 
-    # Print the RAIDVolume instance's CACHE
-
     def print_vol_cache(self):
-        
+        """
+        Print a RAIDVolume instance's CACHE info
+        """
         print "Read Ahead      : " + self[CACHE]['read_ahead']
         print "Fast Write      : " + self[CACHE]['fast_write']
         print "Cache Flush Mod.: " + self[CACHE]['flush_mod']
@@ -213,9 +269,10 @@ class RAIDVolume(DictType):
         k = int(self[CACHE]['cache_block']) * 512 / 1024
         print "Cache Block Size: " + str(k) + "K"
 
-    # Print the RAIDVolume instance's VGINFO
     def print_vol_vginfo(self):
-        
+        """
+        Print a RAIDVolume instance's VGINFO
+        """
         print "VG Label    : " + self[VGINFO]['vg_label']
         print "Drive Count : " + self[VGINFO]['drive_count']
         print "Boundary    : " + self[VGINFO]['boundary']
@@ -224,70 +281,24 @@ class RAIDVolume(DictType):
     def print_vol_iostats(self):
         pass
 
-    # Direct access to a RAIDVolume instance's internal dicts
-    # by passing cat (INFO, CACHE, VGINFO) and relative key.
-
     def get_value_with_keys(self, cat, key):
-        
-        return self[cat][key]
+        """
+        Get the value off a RAIDVolume instance's dict
+        @param cat: INFO, CACHE, VGINFO
+        @param key: String of the key being requested
+        @return: Returns value requested if value of cat meets criteria, otherwise returns False
+        """
+        if cat in [INFO, CACHE, VGINFO]:
+            return self[cat][key]
+        else:
+            return False
 
     # Direct access to a RAIDVolume instrance's IOSTAT dict
     # by passing an IOSTAT category and relative key.
 
     def get_iostats_with_keys(self, cat, key):
-        
-        return self[IOSTAT][cat][key]
-
-
-def build_raid_volumes(statecapture):
-    # Generate all RAIDVolume objects with a passed in buffer
-    # buffer should be open file object
-    statecapture.seek(0)
-    buf = statecapture.readlines()
-    # Be Kind, Rewind!
-    statecapture.seek(0)
-    
-    temp = StringIO.StringIO()
-    start = False
-    
-    for line in buf:
-        
-        start_evfshow = find_executing.search(line)
-        
-        if start_evfshow:
-
-            if start:
-                if start_evfshow.group(1) == "evfShowVol":
-                    
-                    evfshow = temp.getvalue()
-                    match = vol_ownership.search(evfshow)
-                    
-                    if match.group(1) == "This controller":
-                        RAIDVolume(evfshow)
-                        temp = StringIO.StringIO()
-                    else:
-                        temp = StringIO.StringIO()
-                        
-                else:
-                    evfshow = temp.getvalue()
-                    match = vol_ownership.search(evfshow)
-                    
-                    if match.group(1) == "This controller":
-                        start = False
-                        RAIDVolume(evfshow)
-                        temp = StringIO.StringIO()
-                    else:
-                        start = False
-                        temp = StringIO.StringIO()
-        
-            elif not start:
-                if start_evfshow.group(1) == "evfShowVol":
-                    start = True
-                
-        elif start:
-            temp.write(line)
-            
-    del buf
+        pass
+        #return self[IOSTAT][cat][key]
 
 def get_raid_volume_instances():
     # Length returned is entries + 1
