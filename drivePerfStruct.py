@@ -1,4 +1,5 @@
 import StringIO
+import string
 from regexes import *
 from types import DictType
 
@@ -13,49 +14,49 @@ class ItnData(DictType):
 
     def __init__(self):
 
-        self[IOCOUNT] = {'r_success': '',
-                         'r_blks_xfer': '',
-                         'w_success': '',
-                         'w_blks_xfer': '',
-                         'queue_depth': '',
-                         'queued': '',
-                         'open_io': ''
+        self[IOCOUNT] = {'r_success': '0',
+                         'r_blks_xfer': '0',
+                         'w_success': '0',
+                         'w_blks_xfer': '0',
+                         'queue_depth': '0',
+                         'queued': '0',
+                         'open_io': '0'
                          }
 
-        self[ERRCOUNT] = {'ch_errs': '',
-                          'hid_abts': '',
-                          'lid_det': '',
-                          'edc': '',
-                          'recovered': '',
-                          'not_ready': '',
-                          'medium': '',
-                          'hw': '',
-                          'ill_req': '',
-                          'unit_attn': '',
-                          'abt_cmd': '',
-                          'other': '',
-                          'busy': '',
-                          'resv_conf': '',
-                          'q_full': '',
-                          'aca_actv': '',
-                          'abort': ''
+        self[ERRCOUNT] = {'ch_errs': '0',
+                          'hid_abts': '0',
+                          'lid_det': '0',
+                          'edc': '0',
+                          'recovered': '0',
+                          'not_ready': '0',
+                          'medium': '0',
+                          'hw': '0',
+                          'ill_req': '0',
+                          'unit_attn': '0',
+                          'abt_cmd': '0',
+                          'other': '0',
+                          'busy': '0',
+                          'resv_conf': '0',
+                          'q_full': '0',
+                          'aca_actv': '0',
+                          'abort': '0'
                           }
 
-        self[REDUNDANCY] = {'o': '',
-                            'r': '',
-                            'p': '',
-                            'chn0_state': '',
-                            'chn1_state': '',
-                            'chn2_state': '',
-                            'chn3_state': ''
+        self[REDUNDANCY] = {'o': '0',
+                            'r': '0',
+                            'p': '0',
+                            'chn0_state': '0',
+                            'chn1_state': '0',
+                            'chn2_state': '0',
+                            'chn3_state': '0'
                             }
 
-        self[PERFORMANCE] = {'r_art': '',
-                             'r_mrt': '',
-                             'w_art': '',
-                             'w_mrt': '',
-                             'old_cmd_age': '',
-                             'bsy_time': ''
+        self[PERFORMANCE] = {'r_art': '0',
+                             'r_mrt': '0',
+                             'w_art': '0',
+                             'w_mrt': '0',
+                             'old_cmd_age': '0',
+                             'bsy_time': '0'
                              }
 
 
@@ -89,6 +90,67 @@ class Drive():
 
     def new_with_drive(self, drive_data):
         pass
+
+    def print_all(self):
+
+        print " [ (0x%s) Tray: %s Slot: %s ITN Count: %s Online ITNs: %s Type: %s ]" % (self.devnum, self.tray, self.slot, self.itncnt, self.onlineitncnt, self.role)
+        print ""
+        print "  [Controller A]\n"
+        print "               READS  - Requests: ( %s )  Blocks: ( %s )  ART: ( %s ms )  MRT: ( %s ms )" % (string.rjust(self.ctrla[IOCOUNT]['r_success'], 12),
+                                                                                                            string.rjust(self.ctrla[IOCOUNT]['r_blks_xfer'], 12),
+                                                                                                            string.rjust(str(convert_to_millisec(int(self.ctrla[PERFORMANCE]['r_art']))), 8),
+                                                                                                            string.rjust(str(convert_to_millisec(int(self.ctrla[PERFORMANCE]['r_mrt']))), 8))
+        print "               WRITES - Requests: ( %s )  Blocks: ( %s )  ART: ( %s ms )  MRT: ( %s ms )" % (string.rjust(self.ctrla[IOCOUNT]['w_success'], 12),
+                                                                                                            string.rjust(self.ctrla[IOCOUNT]['w_blks_xfer'], 12),
+                                                                                                            string.rjust(str(convert_to_millisec(int(self.ctrla[PERFORMANCE]['w_art']))), 8),
+                                                                                                            string.rjust(str(convert_to_millisec(int(self.ctrla[PERFORMANCE]['w_mrt']))), 8))
+        print ""
+        print "        DRIVER ERRORS -   Chn Rel: ( %s )  HID Abort: ( %s )    LID Det: ( %s )        EDC: ( %s )" % (string.rjust(self.ctrla[ERRCOUNT]['ch_errs'], 4),
+                                                                                                                      string.rjust(self.ctrla[ERRCOUNT]['hid_abts'], 4),
+                                                                                                                      string.rjust(self.ctrla[ERRCOUNT]['lid_det'], 4),
+                                                                                                                      string.rjust(self.ctrla[ERRCOUNT]['edc'], 4))
+        print "     CHECK CONDITIONS - Recovered: ( %s )  Not Ready: ( %s )     Medium: ( %s )   Hardware: ( %s )" % (string.rjust(self.ctrla[ERRCOUNT]['recovered'], 4),
+                                                                                                                      string.rjust(self.ctrla[ERRCOUNT]['not_ready'], 4),
+                                                                                                                      string.rjust(self.ctrla[ERRCOUNT]['medium'], 4),
+                                                                                                                      string.rjust(self.ctrla[ERRCOUNT]['hw'], 4))
+        print "                         Ill. Req: ( %s )  Unit Attn: ( %s )      Abort: ( %s )      Other: ( %s )" % (string.rjust(self.ctrla[ERRCOUNT]['ill_req'], 4),
+                                                                                                                      string.rjust(self.ctrla[ERRCOUNT]['unit_attn'], 4),
+                                                                                                                      string.rjust(self.ctrla[ERRCOUNT]['abt_cmd'], 4),
+                                                                                                                      string.rjust(self.ctrla[ERRCOUNT]['other'], 4))
+        print "          SCSI STATUS -      Busy: ( %s ) Resv. Conf: ( %s )     Q Full: ( %s )    Aborted: ( %s )" % (string.rjust(self.ctrla[ERRCOUNT]['busy'], 4),
+                                                                                                                      string.rjust(self.ctrla[ERRCOUNT]['resv_conf'], 4),
+                                                                                                                      string.rjust(self.ctrla[ERRCOUNT]['q_full'], 4),
+                                                                                                                      string.rjust(self.ctrla[ERRCOUNT]['abort'], 4))
+        print ""
+        print "  [Controller B]\n"
+        print "               READS  - Requests: ( %s )   Blocks: ( %s )  ART: ( %s ms )  MRT: ( %s ms )" % (string.rjust(self.ctrlb[IOCOUNT]['r_success'], 12),
+                                                                                                             string.rjust(self.ctrlb[IOCOUNT]['r_blks_xfer'], 12),
+                                                                                                             string.rjust(str(convert_to_millisec(int(self.ctrlb[PERFORMANCE]['r_art']))), 8),
+                                                                                                             string.rjust(str(convert_to_millisec(int(self.ctrlb[PERFORMANCE]['r_mrt']))), 8))
+
+        print "               WRITES - Requests: ( %s )   Blocks: ( %s )  ART: ( %s ms )  MRT: ( %s ms )" % (string.rjust(self.ctrlb[IOCOUNT]['r_success'], 12),
+                                                                                                             string.rjust(self.ctrlb[IOCOUNT]['r_blks_xfer'], 12),
+                                                                                                             string.rjust(str(convert_to_millisec(int(self.ctrlb[PERFORMANCE]['r_art']))), 8),
+                                                                                                             string.rjust(str(convert_to_millisec(int(self.ctrlb[PERFORMANCE]['r_mrt']))), 8))
+        print ""
+        print "        DRIVER ERRORS -   Chn Rel: ( %s )  HID Abort: ( %s )    LID Det: ( %s )        EDC: ( %s )" % (string.rjust(self.ctrlb[ERRCOUNT]['ch_errs'], 4),
+                                                                                                                      string.rjust(self.ctrlb[ERRCOUNT]['hid_abts'], 4),
+                                                                                                                      string.rjust(self.ctrlb[ERRCOUNT]['lid_det'], 4),
+                                                                                                                      string.rjust(self.ctrlb[ERRCOUNT]['edc'], 4))
+        print "     CHECK CONDITIONS - Recovered: ( %s )  Not Ready: ( %s )     Medium: ( %s )   Hardware: ( %s )" % (string.rjust(self.ctrlb[ERRCOUNT]['recovered'], 4),
+                                                                                                                      string.rjust(self.ctrlb[ERRCOUNT]['not_ready'], 4),
+                                                                                                                      string.rjust(self.ctrlb[ERRCOUNT]['medium'], 4),
+                                                                                                                      string.rjust(self.ctrlb[ERRCOUNT]['hw'], 4))
+        print "                         Ill. Req: ( %s )  Unit Attn: ( %s )      Abort: ( %s )      Other: ( %s )" % (string.rjust(self.ctrlb[ERRCOUNT]['ill_req'], 4),
+                                                                                                                      string.rjust(self.ctrlb[ERRCOUNT]['unit_attn'], 4),
+                                                                                                                      string.rjust(self.ctrlb[ERRCOUNT]['abt_cmd'], 4),
+                                                                                                                      string.rjust(self.ctrlb[ERRCOUNT]['other'], 4))
+        print "          SCSI STATUS -      Busy: ( %s ) Resv. Conf: ( %s )     Q Full: ( %s )    Aborted: ( %s )" % (string.rjust(self.ctrlb[ERRCOUNT]['busy'], 4),
+                                                                                                                      string.rjust(self.ctrlb[ERRCOUNT]['resv_conf'], 4),
+                                                                                                                      string.rjust(self.ctrlb[ERRCOUNT]['q_full'], 4),
+                                                                                                                      string.rjust(self.ctrlb[ERRCOUNT]['abort'], 4))
+        print ""
+
 
 # Parses out first ionShow 12 output found in the state capture
 # Returns an ionShow 12 blob
@@ -428,3 +490,12 @@ def find_drive_by_wwn(wwn):
 
         if wwn == drive.wwn:
             return drive
+
+
+def convert_to_millisec(num):
+    time = float(num)
+    factor = float(0.001)
+
+    result = time * factor
+
+    return result

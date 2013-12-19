@@ -14,22 +14,36 @@ class VolumeGroup():
 
     def __init__(self, buf):
 
-        match = vg_details.search(buf)
+        raid = vg_raid.search(buf)
+        crush =vg_crush.search(buf)
+        label = vg_label.search(buf)
+        vols = vg_vol_count.search(buf)
+        active = vg_act_drives.search(buf)
+        inactive = vg_inact_drives.search(buf)
+        state = vg_state.search(buf)
+        secure = vg_secure.search(buf)
+        pi_info = vg_pi_info.search(buf)
 
-        if match:
-            self.label = match.group(11)
-            self.raid = match.group(1)
-            self.vol_cnt = match.group(7)
-            self.drv_cnt = int(match.group(5)) + int(match.group(6))
-            self.state = match.group(2)
-            self.act_drv = match.group(5)
-            self.inact_drv = match.group(6)
-            self.pieces = dict()
-            self.volumes = []
+        self.label = label.group(1)
+        if raid:
+            self.raid = raid.group(1)
 
-            self.add_pieces(buf)
+        elif crush:
+            self.raid = 'CRUSH'
+        self.vol_cnt = vols.group(1)
+        self.drv_cnt = int(active.group(1)) + int(inactive.group(1))
+        self.state = state.group(1)
+        self.act_drv = active.group(1)
+        self.inact_drv = inactive.group(1)
+        self.secure = secure.group(1)
+        self.pi_enable = pi_info.group(1)
+        self.pi_type = pi_info.group(2)
+        self.pieces = dict()
+        self.volumes = []
 
-            VolumeGroup._instances.append(self)
+        self.add_pieces(buf)
+
+        VolumeGroup._instances.append(self)
 
     @classmethod
     def build_volume_groups(cls, statecapture):
@@ -50,13 +64,17 @@ class VolumeGroup():
             start_seq = vg_entry_start.search(line)
 
             if start_seq:
+                #print "build_volume_groups: start of VG found "
                 start = True
+                #print line
                 temp.write(line)
 
             elif len(line) > 1:
+                #print line
                 temp.write(line)
 
             elif len(line) == 1 and start is True:
+                #print "build_volume_groups: calling VolumeGroup()"
                 VolumeGroup(temp.getvalue())
                 del temp
                 temp = StringIO.StringIO()
@@ -156,6 +174,22 @@ class VolumeGroup():
         else:
             return False
 
+    def print_info(self):
+        print " Volume Group Information:"
+        print "  Label         : " + self.label
+        print "  State         : " + self.state
+        print "  RAID Level    : " + self.raid
+        print "  Secure (FDE)  : " + self.secure
+        print "  T10PI         : " + self.pi_enable
+        if self.pi_enable == 'T':
+            print "  PI Type       : " + self.pi_type
+        print "  Total Drives  : " + str(self.drv_cnt)
+        print "  ---Active     : " + self.act_drv
+        print "  ---Inactive   : " + self.inact_drv
+        print "\n"
+
+
+
 ## Functions to parse required output (vdmShowVGInfo) and generate
 ## VolumeGroup objects from an array's state-capture-data.txt
 
@@ -182,13 +216,16 @@ def get_vginfo(statecapture):
 
         if not start_found:
             if cmd_start:
+                #print "get_vginfo: Found Start"
                 start_found = True
 
         elif start_found:
             if cmd_end:
                 vdmshowvginfo = temp.getvalue()
+                #print "Returning vdmshowvginfo"
                 return vdmshowvginfo
 
             elif start_found:
+                #print line
                 temp.write(line)
 

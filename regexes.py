@@ -60,13 +60,22 @@ vol_list_count = re.compile("\s*Total\sRAIDVolumes:\s(\d+)", re.MULTILINE)
 vol_list_entry = re.compile("\s0x\w{8}\s(\d{6})\s(RV_\w+)\s+(\d+)\s(\w{3,4})\s+(\w{3,4})\s+(\d+)", re.MULTILINE)
 
 ## vdmShowVGInfo
-find_vdmShowVGInfo = re.compile("Executing\svdmShowVGInfo\(\S+\)\son\scontroller\s(A|B)", re.MULTILINE)
+find_vdmShowVGInfo = re.compile("\s*Executing\svdmShowVGInfo\(\S+\)\son\scontroller\s(A|B)", re.MULTILINE)
 vg_entry_start = re.compile("Seq:\d+", re.MULTILINE)
 
 # Seq:1 / RAID 6 / VGCompleteState / TLP:F / DLP:F / SSM:T / ActDrv:8 / InActDrv:0 / VolCnt:2 / Secure:No
 # PI Capable:F - 0 / Label:0 / VGWwn:600a0b800050d676000002354c5ae04a
 vg_details = re.compile(
     "Seq:\d+\s\/\sRAID\s(\d+)\s\/\s(\w+)\s\/\sTLP:(T|F)\s\/\sDLP:(T|F)\s\/\sSSM:\w\s\/\sActDrv:(\d+)\s\/\sInActDrv:(\d+)\s\/\sVolCnt:(\d+)\s\/\sSecure:(Enable|Disable)d?\nBlockSize:\d*\s\/\sPI\sCapable:(T|F)\s-\s(\d+)\s\/\sLabel:(\w+)", re.MULTILINE)
+vg_raid = re.compile("Seq:\d+\s\/\sRAID\s(\d+)")
+vg_crush = re.compile("Seq:\d+\s\/\s(Crush)\s")
+vg_state = re.compile("(VG\w+State)")
+vg_act_drives = re.compile("\sActDrv:(\d*)")
+vg_inact_drives = re.compile("InActDrv:(\d*)")
+vg_vol_count = re.compile("VolCnt:(\d+)")
+vg_label = re.compile("Label:(\S+)")
+vg_secure = re.compile("Secure:(Enable|Disable|Yes|No)")
+vg_pi_info = re.compile("PI\sCapable:(T|F)\s-\s(\d+)")
 
 # (Active) Drive:0x02c38260 devnum:0x00010001 seqNum:1 Tray/Slot:85/02  State:Acc/GrA/Opt
 vg_drive_entry = re.compile(
@@ -74,11 +83,15 @@ vg_drive_entry = re.compile(
 
 ## evfShowVol
 
+vol_evfshowvol = re.compile("\s*Executing\s(\w+)\((\d+),0,0,0,0,0,0,0,0,0\)\son\scontroller\s(A|B)", re.MULTILINE)
 vol_ssid_type = re.compile("Volume\s(0x\w+)\((\w+)\)", re.MULTILINE)
+vol_is_crush = re.compile("\s+\S+vdm\S+(CrushVolumeGroup)", re.MULTILINE)
+vol_is_trad = re.compile("\s+\S+vdm\d+(VolumeGroup)", re.MULTILINE)
 
 # 1 - Vol Details
+vol_raid_level = re.compile("\s+Volume\sType:\s*\S*\sRAID\s(\d+)", re.MULTILINE)
 vol_num_children = re.compile("\s+(\d+)\sChildren", re.MULTILINE)
-vol_user_label = re.compile("\s+User\sLabel:\s+(\w+)", re.MULTILINE)
+vol_user_label = re.compile("\s+User\sLabel:\s+(\S+)", re.MULTILINE)
 vol_capacity = re.compile("\s+Capacity:\s+(\d+)\sblocks", re.MULTILINE)
 vol_blocksize = re.compile("\s+BlockSize:\s+(\d+)", re.MULTILINE)
 vol_segment_size = re.compile("\s+Segment\sSize:\s+(\d+)\sblocks", re.MULTILINE)
@@ -116,7 +129,10 @@ vol_cache_min_warn_flush = re.compile("\s*Min\sWarn\sFlush\sModifier:\s+(\d+)", 
 vol_cache_granularity = re.compile("\s*Cache\sGranularity:\s+(\d+)", re.MULTILINE)
 
 # 4 - VG Info
-vol_vg_label = re.compile("\s*VG\sLabel\s+:\s+(\w+)", re.MULTILINE)
+vol_vg_label = re.compile("\s*VG\sLabel\s+:\s+(\S+)", re.MULTILINE)
 vol_vg_drive_count = re.compile("\s*Drive\sCount:\s+(\d+)", re.MULTILINE)
 vol_vg_boundary = re.compile("\s*Boundary\s+:\s+(\d+)", re.MULTILINE)
 vol_vg_media_type = re.compile("\s*Media\sType\s+:\s+(\w+)", re.MULTILINE)
+
+vol_vg_label_crush = re.compile("^Label:\s+(\S+)", re.MULTILINE)
+vol_vg_drive_count_crush = re.compile("\(\w+\)\sDrive\sCount:\s+(\d+)", re.MULTILINE)
