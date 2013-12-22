@@ -17,15 +17,21 @@ def analyze_vol_io_profile(vol, group):
     data_pieces = int(stripe_width) / int(cluster_size)
     raid_level = int(vol.get_value_with_keys(INFO, 'raid_level'))
 
-    read_count = int(vol.get_iostats_with_keys('reads', 'io'))
-    write_count = int(vol.get_iostats_with_keys('writes', 'io'))
-    avg_sm_read_size = int(vol.get_iostats_with_keys('avg_blocks', 'sm_reads'))
-    avg_sm_write_size = int(vol.get_iostats_with_keys('avg_blocks', 'sm_writes'))
+    read_count = int(vol.get_combined_iostats_with_keys('reads', 'io'))
+    write_count = int(vol.get_combined_iostats_with_keys('writes', 'io'))
+    avg_sm_read_size = int(vol.get_combined_iostats_with_keys('avg_blocks', 'sm_reads'))
+    avg_sm_write_size = int(vol.get_combined_iostats_with_keys('avg_blocks', 'sm_writes'))
     #avg_lg_read_size = int(vol.get_iostats_with_keys('avg_blocks', 'lg_reads'))
     #avg_lg_write_size = int(vol.get_iostats_with_keys('avg_blocks', 'lg_writes'))
 
+    read_art_a = int(vol.get_iostats_with_keys_a('response', 'read_art'))
+    read_art_b = int(vol.get_iostats_with_keys_b('response', 'read_art'))
+    write_art_a = int(vol.get_iostats_with_keys_a('response', 'write_art'))
+    write_art_b = int(vol.get_iostats_with_keys_b('response', 'write_art'))
+
     vol.print_vol_info()
     vol.print_vol_cache()
+    vol.show_io_share()
     print " WRITE Analysis:\n"  # Perform WRITE Analysis
 
     if write_count > 0:
@@ -37,19 +43,24 @@ def analyze_vol_io_profile(vol, group):
 
             print "     Write Algorithms    :"
             print "         [FULL] %d [FSWT] %d [PARTIAL] %d [RMW] %d [RMW2] %d [NO_PARITY] %d" % (
-                int(vol.get_iostats_with_keys('write_algorithm', 'full')),
-                int(vol.get_iostats_with_keys('write_algorithm', 'FSWT')),
-                int(vol.get_iostats_with_keys('write_algorithm', 'partial')),
-                int(vol.get_iostats_with_keys('write_algorithm', 'RMW')),
-                int(vol.get_iostats_with_keys('write_algorithm', 'RMW2')),
-                int(vol.get_iostats_with_keys('write_algorithm', 'no_parity')))
+                int(vol.get_combined_iostats_with_keys('write_algorithm', 'full')),
+                int(vol.get_combined_iostats_with_keys('write_algorithm', 'FSWT')),
+                int(vol.get_combined_iostats_with_keys('write_algorithm', 'partial')),
+                int(vol.get_combined_iostats_with_keys('write_algorithm', 'RMW')),
+                int(vol.get_combined_iostats_with_keys('write_algorithm', 'RMW2')),
+                int(vol.get_combined_iostats_with_keys('write_algorithm', 'no_parity')))
 
             print " "
-            write_drives_per_req = evaluate_ratio(vol.get_iostats_with_keys('writes', 'clusters'), write_count)
-            write_stripes_per_req = evaluate_ratio(vol.get_iostats_with_keys('writes', 'stripes'), write_count)
+            write_drives_per_req = evaluate_ratio(vol.get_combined_iostats_with_keys('writes', 'clusters'), write_count)
+            write_stripes_per_req = evaluate_ratio(vol.get_combined_iostats_with_keys('writes', 'stripes'), write_count)
 
             analyze_stripe_ratio(write_stripes_per_req, stripe_width, avg_sm_write_size, cluster_size)
             analyze_cluster_ratio(write_drives_per_req, data_pieces)
+
+            print ""
+            print "     Response Times -\n"
+            print "        Controller A: %.03f ms" % (convert_to_millisec(write_art_a))
+            print "        Controller B: %.03f ms" % (convert_to_millisec(write_art_b))
 
         elif raid_level is 1:
 
@@ -68,8 +79,13 @@ def analyze_vol_io_profile(vol, group):
                 #write_stripes_per_req = evaluate_ratio(vol.get_iostats_with_keys('writes', 'stripes'), write_count)
                 #analyze_stripe_ratio(write_stripes_per_req, stripe_width, avg_sm_write_size, cluster_size)
 
-                write_drives_per_req = evaluate_ratio(vol.get_iostats_with_keys('writes', 'clusters'), write_count)
+                write_drives_per_req = evaluate_ratio(vol.get_combined_iostats_with_keys('writes', 'clusters'), write_count)
                 analyze_cluster_ratio(write_drives_per_req, data_pieces)
+
+            print ""
+            print "     Response Times -\n"
+            print "        Controller A: %.03f ms" % (convert_to_millisec(write_art_a))
+            print "        Controller B: %.03f ms" % (convert_to_millisec(write_art_b))
 
         else:
             print "     No requests to perform analysis on.\n"
@@ -86,11 +102,16 @@ def analyze_vol_io_profile(vol, group):
 
         if raid_level in {5, 6}:
 
-            read_drives_per_req = evaluate_ratio(vol.get_iostats_with_keys('reads', 'clusters'), read_count)
-            read_stripes_per_req = evaluate_ratio(vol.get_iostats_with_keys('reads', 'stripes'), read_count)
+            read_drives_per_req = evaluate_ratio(vol.get_combined_iostats_with_keys('reads', 'clusters'), read_count)
+            read_stripes_per_req = evaluate_ratio(vol.get_combined_iostats_with_keys('reads', 'stripes'), read_count)
 
             analyze_stripe_ratio(read_stripes_per_req, stripe_width, avg_sm_read_size, cluster_size)
             analyze_cluster_ratio(read_drives_per_req, data_pieces)
+
+            print ""
+            print "     Response Times -\n"
+            print "        Controller A: %.03f ms" % (convert_to_millisec(read_art_a))
+            print "        Controller B: %.03f ms" % (convert_to_millisec(read_art_b))
 
         elif raid_level is 1:
 
@@ -109,8 +130,13 @@ def analyze_vol_io_profile(vol, group):
                 #read_stripes_per_req = evaluate_ratio(vol.get_iostats_with_keys('reads', 'stripes'), read_count)
                 #analyze_stripe_ratio(read_stripes_per_req, stripe_width, avg_sm_read_size, cluster_size)
 
-                read_drives_per_req = evaluate_ratio(vol.get_iostats_with_keys('reads', 'clusters'), read_count)
+                read_drives_per_req = evaluate_ratio(vol.get_combined_iostats_with_keys('reads', 'clusters'), read_count)
                 analyze_cluster_ratio(read_drives_per_req, data_pieces)
+
+            print ""
+            print "     Response Times -\n"
+            print "        Controller A: %.03f ms" % (convert_to_millisec(read_art_a))
+            print "        Controller B: %.03f ms" % (convert_to_millisec(read_art_b))
 
     else:
         print "     No requests to perform analysis on.\n"
@@ -191,9 +217,11 @@ def analyze_drive_group(vol_group):
             devnum = vol_group.pieces[i]['devnum']
             for d in Drive._instances:
                 if d.devnum == devnum:
+                    d.print_all()
                     drive_list.append(d)
 
         analyze_drive_group_response_times(drive_list)
+        analyze_drive_group_busy_time(drive_list)
 
     else:
         return False
@@ -219,8 +247,6 @@ def analyze_drive_group_response_times(drive_list):
         ctrla_art_writes.append((d.devnum, a_write_art))
         ctrlb_art_writes.append((d.devnum, b_write_art))
 
-        d.print_all()
-
     ctrla_read_avg = find_average(ctrla_art_reads)
     ctrla_write_avg = find_average(ctrla_art_writes)
 
@@ -238,7 +264,7 @@ def analyze_drive_group_response_times(drive_list):
     print "              Controller A: %.03f ms" % convert_to_millisec(ctrla_read_avg)
     print "              Controller B: %.03f ms" % convert_to_millisec(ctrlb_read_avg)
     print ""
-    print "     Drives exceeding those averages (125% > Avg):\n"
+    print "     Drives exceeding those averages (150% > Avg):\n"
 
     ctrla_drives_r = "              Controller A: "
     if len(ctrla_outliers_reads) > 0:
@@ -264,7 +290,7 @@ def analyze_drive_group_response_times(drive_list):
     print "              Controller A: %.03f ms" % convert_to_millisec(ctrla_write_avg)
     print "              Controller B: %.03f ms" % convert_to_millisec(ctrlb_write_avg)
     print ""
-    print "     Drives exceeding those averages (125% > Avg):\n"
+    print "     Drives exceeding those averages (150% > Avg):\n"
 
     ctrla_drives_w = "              Controller A: "
     if len(ctrla_outliers_writes) > 0:
@@ -285,9 +311,35 @@ def analyze_drive_group_response_times(drive_list):
         ctrlb_drives_w += "None"
         print ctrlb_drives_w
 
+    print ""
+
 
 def analyze_drive_group_busy_time(drive_list):
-    pass
+
+    ctrla_busy_times = []
+    ctrlb_busy_times = []
+
+    print " Total drive activity -\n"
+    print "       %s | %s | %s" % (string.center('Devnum', 10), string.rjust('A - Busy Time', 15), string.rjust('B - Busy Time', 15))
+    print "       ----------------------------------------------"
+
+    for d in drive_list:
+        a_b_time = d.ctrla[PERFORMANCE]['bsy_time']
+        b_b_time = d.ctrlb[PERFORMANCE]['bsy_time']
+
+        ctrla_busy_times.append((d.devnum, a_b_time))
+        ctrlb_busy_times.append((d.devnum, b_b_time))
+
+        print "       %s | %s ms | %s ms" % (string.center(d.devnum, 10), string.rjust(a_b_time, 12), string.rjust(b_b_time, 12))
+
+    a_avg = find_average(ctrla_busy_times)
+    b_avg = find_average(ctrlb_busy_times)
+    print "       ----------------------------------------------"
+    print "       %s | %s ms | %s ms" % (string.rjust('Average ', 10), string.rjust(str(int(a_avg)), 12), string.rjust(str(int(b_avg)), 12))
+
+    a_outliers = find_outlier(ctrla_busy_times, a_avg)
+    b_outliers = find_outlier(ctrlb_busy_times, b_avg)
+
 
 
 ## Helper functions
@@ -329,7 +381,7 @@ def find_outlier(data, avg):
 
     outliers = []
 
-    wavg = float(avg) * float(1.25)
+    wavg = float(avg) * float(1.50)
 
     for e in data:
 

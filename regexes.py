@@ -31,24 +31,19 @@ find_luall2 = re.compile('->\sluall\s2', re.MULTILINE)
 #....Logical Unit....:....IOs....:Rlat : HID  LID      :Rec-  Not            Ill Unit Abrt      :     Resv    Q  ACA
 #    Devnum Location : Completed :Errs :Abrt Dtec  EDC :ovrd Redy  Med  H/W  Req Attn  Cmd Othr :Busy Conf Full Actv Abrt
 #---------- -------- :---------- :---- :---- ----- --- :---- ----- ---- ---- --- ---- ---- ---- :---- ---- ---- ---- ----
-#mg:    1     2,3          4       5      6    7    8    9     10   11   12   13  14   15   16    17   18   19   20   21
+#mg:    2     3,4          5        6     7    8    9    10    11   12   13   14  15   16   17    18   19   20   21   22
 
 luall2_drive = re.compile(
-    "\s*(\w{8})\s*t(\d{1,2}),s(\d{1,2})\s*:\s*(\d+)\s*:\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s*(\d)\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)", re.MULTILINE)
+    "(\s*|d<|#d|=<|-<)(\w{8})\s*t(\d{1,2}),s(\d{1,2})\s*:\s*(\d+)\s*:\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s*(\d)\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)", re.MULTILINE)
 
 ## luall 3
 find_luall3 = re.compile("->\sluall\s3", re.MULTILINE)
 
 #....Logical Unit... :.................R E A D S................:...............W R I T E S................:
 #    Devnum Location :  #Success BlksXfered ART(uSec) MRT(uSec) :  #Success BlksXfered ART(uSec) MRT(uSec) :#Errs IO/s  BsyTm(milliSec)
-#mg:   1     2,3           4        5         6          7            8        9          10        11       12   13        14
+#mg:   2     3,4           5        6         7          8            9        10          11        12       13   14        15
 luall3_drive = re.compile(
-    "\s*(\w{8})\s*t(\d{1,2}),s(\d{1,2})\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s+(\d+)", re.MULTILINE)
-
-## vdall
-
-#Executing vdall(0,0,0,0,0,0,0,0,0,0) on controller A:
-find_vdall = re.compile("Executing\svdall\(0,\S+\son\scontroller\s(A|B):", re.MULTILINE)
+    "(\s*|d<|#d|=<|-<)(\w{8})\s*t(\d{1,2}),s(\d{1,2})\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*:\s*(\d+)\s*(\d+)\s+(\d+)", re.MULTILINE)
 
 #..Virtual. :..................R E A D S................:................W R I T E S................:
 #...Disk #. :  #Success BlksXferred ART(uSec) MRT(uSec) :  #Success BlksXferred ART(uSec) MRT(uSec) :
@@ -66,7 +61,7 @@ vg_entry_start = re.compile("Seq:\d+", re.MULTILINE)
 # Seq:1 / RAID 6 / VGCompleteState / TLP:F / DLP:F / SSM:T / ActDrv:8 / InActDrv:0 / VolCnt:2 / Secure:No
 # PI Capable:F - 0 / Label:0 / VGWwn:600a0b800050d676000002354c5ae04a
 vg_details = re.compile(
-    "Seq:\d+\s\/\sRAID\s(\d+)\s\/\s(\w+)\s\/\sTLP:(T|F)\s\/\sDLP:(T|F)\s\/\sSSM:\w\s\/\sActDrv:(\d+)\s\/\sInActDrv:(\d+)\s\/\sVolCnt:(\d+)\s\/\sSecure:(Enable|Disable)d?\nBlockSize:\d*\s\/\sPI\sCapable:(T|F)\s-\s(\d+)\s\/\sLabel:(\w+)", re.MULTILINE)
+    "Seq:\d+\s\/\sRAID\s(\d+)\s\/\s(\w+)\s\/\sTLP:(T|F)\s\/\sDLP:(T|F)\s\/\sSSM:\w\s\/\sActDrv:(\d+)\s\/\sInActDrv:(\d+)\s\/\sVolCnt:(\d+)\s\/\sSecure:(Enable|Disable|Yes|No|Capable)d?\nBlockSize:\d*\s\/\sPI\sCapable:(T|F)\s-\s(\d+)\s\/\sLabel:(\w+)", re.MULTILINE)
 vg_raid = re.compile("Seq:\d+\s\/\sRAID\s(\d+)")
 vg_crush = re.compile("Seq:\d+\s\/\s(Crush)\s")
 vg_state = re.compile("(VG\w+State)")
@@ -74,12 +69,23 @@ vg_act_drives = re.compile("\sActDrv:(\d*)")
 vg_inact_drives = re.compile("InActDrv:(\d*)")
 vg_vol_count = re.compile("VolCnt:(\d+)")
 vg_label = re.compile("Label:(\S+)")
-vg_secure = re.compile("Secure:(Enable|Disable|Yes|No)")
+vg_secure = re.compile("Secure:(Enable|Disable|Yes|No|Capable)")
 vg_pi_info = re.compile("PI\sCapable:(T|F)\s-\s(\d+)")
 
 # (Active) Drive:0x02c38260 devnum:0x00010001 seqNum:1 Tray/Slot:85/02  State:Acc/GrA/Opt
+#mg: 1                                  2          3              4 5          6       7
 vg_drive_entry = re.compile(
     "\((Active|Inactive)\)\sDrive:0x\w{8}\sdev[n,N]um:0x(\w{8})\sseqNum:(\d+)\sTray\/Slot:(\d+)\/(\d+)\s+State:(\w+)\/GrA\/(\w+)", re.MULTILINE)
+
+## vdAll
+
+find_vdall = re.compile("\s*Executing\svdall\(0,0,0,0,0,0,0,0,0,0\)\son\scontroller\s(A|B)", re.MULTILINE)
+
+#..Virtual. :..................R E A D S................:................W R I T E S................:
+#...Disk #. :  #Success BlksXferred ART(uSec) MRT(uSec) :  #Success BlksXferred ART(uSec) MRT(uSec) :
+#---------- :---------- ----------- --------- --------- :---------- ----------- --------- --------- :
+#mg: 1            2         3           4         5           6          7          8          9
+vdall_entry = re.compile("\s*(\w+)\s*:\s*(\w+)\s*(\w+)\s*(\w+)\s*(\w+)\s*:\s*(\w+)\s*(\w+)\s*(\w+)\s*(\w+)\s*:", re.MULTILINE)
 
 ## evfShowVol
 
@@ -134,5 +140,5 @@ vol_vg_drive_count = re.compile("\s*Drive\sCount:\s+(\d+)", re.MULTILINE)
 vol_vg_boundary = re.compile("\s*Boundary\s+:\s+(\d+)", re.MULTILINE)
 vol_vg_media_type = re.compile("\s*Media\sType\s+:\s+(\w+)", re.MULTILINE)
 
-vol_vg_label_crush = re.compile("^Label:\s+(\S+)", re.MULTILINE)
+vol_vg_label_crush = re.compile("^Label:\s+(\S+)", re.MULTILINE)    # Starts from beginning of line because match will be found on vol label otherwise
 vol_vg_drive_count_crush = re.compile("\(\w+\)\sDrive\sCount:\s+(\d+)", re.MULTILINE)

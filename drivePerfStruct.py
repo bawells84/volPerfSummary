@@ -123,12 +123,12 @@ class Drive():
                                                                                                                       string.rjust(self.ctrla[ERRCOUNT]['abort'], 4))
         print ""
         print "  [Controller B]\n"
-        print "               READS  - Requests: ( %s )   Blocks: ( %s )  ART: ( %s ms )  MRT: ( %s ms )" % (string.rjust(self.ctrlb[IOCOUNT]['r_success'], 12),
+        print "               READS  - Requests: ( %s )   Blocks: ( %s )  ART: ( %s ms ) MRT: ( %s ms )" % (string.rjust(self.ctrlb[IOCOUNT]['r_success'], 12),
                                                                                                              string.rjust(self.ctrlb[IOCOUNT]['r_blks_xfer'], 12),
                                                                                                              string.rjust(str(convert_to_millisec(int(self.ctrlb[PERFORMANCE]['r_art']))), 8),
                                                                                                              string.rjust(str(convert_to_millisec(int(self.ctrlb[PERFORMANCE]['r_mrt']))), 8))
 
-        print "               WRITES - Requests: ( %s )   Blocks: ( %s )  ART: ( %s ms )  MRT: ( %s ms )" % (string.rjust(self.ctrlb[IOCOUNT]['r_success'], 12),
+        print "               WRITES - Requests: ( %s )   Blocks: ( %s )  ART: ( %s ms ) MRT: ( %s ms )" % (string.rjust(self.ctrlb[IOCOUNT]['r_success'], 12),
                                                                                                              string.rjust(self.ctrlb[IOCOUNT]['r_blks_xfer'], 12),
                                                                                                              string.rjust(str(convert_to_millisec(int(self.ctrlb[PERFORMANCE]['r_art']))), 8),
                                                                                                              string.rjust(str(convert_to_millisec(int(self.ctrlb[PERFORMANCE]['r_mrt']))), 8))
@@ -363,47 +363,47 @@ def process_luall2(buf, ctrl_slot):
 
             for d in Drive._instances:
 
-                if d.devnum == match.group(1):
+                if d.devnum == match.group(2):
 
                     if ctrl_slot is 'a':
 
-                        d.ctrla[ERRCOUNT]['ch_errs'] = match.group(5)
-                        d.ctrla[ERRCOUNT]['hid_abts'] = match.group(6)
-                        d.ctrla[ERRCOUNT]['lid_det'] = match.group(7)
-                        d.ctrla[ERRCOUNT]['edc'] = match.group(8)
-                        d.ctrla[ERRCOUNT]['recovered'] = match.group(9)
-                        d.ctrla[ERRCOUNT]['not_ready'] = match.group(10)
-                        d.ctrla[ERRCOUNT]['medium'] = match.group(11)
-                        d.ctrla[ERRCOUNT]['hw'] = match.group(12)
-                        d.ctrla[ERRCOUNT]['ill_req'] = match.group(13)
-                        d.ctrla[ERRCOUNT]['unit_attn'] = match.group(14)
-                        d.ctrla[ERRCOUNT]['abt_cmd'] = match.group(15)
-                        d.ctrla[ERRCOUNT]['other'] = match.group(16)
-                        d.ctrla[ERRCOUNT]['busy'] = match.group(17)
-                        d.ctrla[ERRCOUNT]['resv_conf'] = match.group(18)
-                        d.ctrla[ERRCOUNT]['q_full'] = match.group(19)
-                        d.ctrla[ERRCOUNT]['aca_actv'] = match.group(20)
-                        d.ctrla[ERRCOUNT]['abort'] = match.group(21)
+                        d.ctrla[ERRCOUNT]['ch_errs'] = match.group(6)
+                        d.ctrla[ERRCOUNT]['hid_abts'] = match.group(7)
+                        d.ctrla[ERRCOUNT]['lid_det'] = match.group(8)
+                        d.ctrla[ERRCOUNT]['edc'] = match.group(9)
+                        d.ctrla[ERRCOUNT]['recovered'] = match.group(10)
+                        d.ctrla[ERRCOUNT]['not_ready'] = match.group(11)
+                        d.ctrla[ERRCOUNT]['medium'] = match.group(12)
+                        d.ctrla[ERRCOUNT]['hw'] = match.group(13)
+                        d.ctrla[ERRCOUNT]['ill_req'] = match.group(14)
+                        d.ctrla[ERRCOUNT]['unit_attn'] = match.group(15)
+                        d.ctrla[ERRCOUNT]['abt_cmd'] = match.group(16)
+                        d.ctrla[ERRCOUNT]['other'] = match.group(17)
+                        d.ctrla[ERRCOUNT]['busy'] = match.group(18)
+                        d.ctrla[ERRCOUNT]['resv_conf'] = match.group(19)
+                        d.ctrla[ERRCOUNT]['q_full'] = match.group(20)
+                        d.ctrla[ERRCOUNT]['aca_actv'] = match.group(21)
+                        d.ctrla[ERRCOUNT]['abort'] = match.group(22)
 
                     elif ctrl_slot is 'b':
 
-                        d.ctrlb[ERRCOUNT]['ch_errs'] = match.group(5)
-                        d.ctrlb[ERRCOUNT]['hid_abts'] = match.group(6)
-                        d.ctrlb[ERRCOUNT]['lid_det'] = match.group(7)
-                        d.ctrlb[ERRCOUNT]['edc'] = match.group(8)
-                        d.ctrlb[ERRCOUNT]['recovered'] = match.group(9)
-                        d.ctrlb[ERRCOUNT]['not_ready'] = match.group(10)
-                        d.ctrlb[ERRCOUNT]['medium'] = match.group(11)
-                        d.ctrlb[ERRCOUNT]['hw'] = match.group(12)
-                        d.ctrlb[ERRCOUNT]['ill_req'] = match.group(13)
-                        d.ctrlb[ERRCOUNT]['unit_attn'] = match.group(14)
-                        d.ctrlb[ERRCOUNT]['abt_cmd'] = match.group(15)
-                        d.ctrlb[ERRCOUNT]['other'] = match.group(16)
-                        d.ctrlb[ERRCOUNT]['busy'] = match.group(17)
-                        d.ctrlb[ERRCOUNT]['resv_conf'] = match.group(18)
-                        d.ctrlb[ERRCOUNT]['q_full'] = match.group(19)
-                        d.ctrlb[ERRCOUNT]['aca_actv'] = match.group(20)
-                        d.ctrlb[ERRCOUNT]['abort'] = match.group(21)
+                        d.ctrlb[ERRCOUNT]['ch_errs'] = match.group(6)
+                        d.ctrlb[ERRCOUNT]['hid_abts'] = match.group(7)
+                        d.ctrlb[ERRCOUNT]['lid_det'] = match.group(8)
+                        d.ctrlb[ERRCOUNT]['edc'] = match.group(9)
+                        d.ctrlb[ERRCOUNT]['recovered'] = match.group(10)
+                        d.ctrlb[ERRCOUNT]['not_ready'] = match.group(11)
+                        d.ctrlb[ERRCOUNT]['medium'] = match.group(12)
+                        d.ctrlb[ERRCOUNT]['hw'] = match.group(13)
+                        d.ctrlb[ERRCOUNT]['ill_req'] = match.group(14)
+                        d.ctrlb[ERRCOUNT]['unit_attn'] = match.group(15)
+                        d.ctrlb[ERRCOUNT]['abt_cmd'] = match.group(16)
+                        d.ctrlb[ERRCOUNT]['other'] = match.group(17)
+                        d.ctrlb[ERRCOUNT]['busy'] = match.group(18)
+                        d.ctrlb[ERRCOUNT]['resv_conf'] = match.group(19)
+                        d.ctrlb[ERRCOUNT]['q_full'] = match.group(20)
+                        d.ctrlb[ERRCOUNT]['aca_actv'] = match.group(21)
+                        d.ctrlb[ERRCOUNT]['abort'] = match.group(22)
         else:
             continue
 
@@ -441,31 +441,31 @@ def process_luall3(buf, ctrl_slot):
 
             for d in Drive._instances:
 
-                if d.devnum == match.group(1):
+                if d.devnum == match.group(2):
 
                     if ctrl_slot is 'a':
 
-                        d.ctrla[IOCOUNT]['r_success'] = match.group(4)
-                        d.ctrla[IOCOUNT]['r_blks_xfer'] = match.group(5)
-                        d.ctrla[PERFORMANCE]['r_art'] = match.group(6)
-                        d.ctrla[PERFORMANCE]['r_mrt'] = match.group(7)
-                        d.ctrla[IOCOUNT]['w_success'] = match.group(8)
-                        d.ctrla[IOCOUNT]['w_blks_xfer'] = match.group(9)
-                        d.ctrla[PERFORMANCE]['w_art'] = match.group(10)
-                        d.ctrla[PERFORMANCE]['w_mrt'] = match.group(11)
-                        d.ctrla[PERFORMANCE]['bsy_time'] = match.group(14)
+                        d.ctrla[IOCOUNT]['r_success'] = match.group(5)
+                        d.ctrla[IOCOUNT]['r_blks_xfer'] = match.group(6)
+                        d.ctrla[PERFORMANCE]['r_art'] = match.group(7)
+                        d.ctrla[PERFORMANCE]['r_mrt'] = match.group(8)
+                        d.ctrla[IOCOUNT]['w_success'] = match.group(9)
+                        d.ctrla[IOCOUNT]['w_blks_xfer'] = match.group(10)
+                        d.ctrla[PERFORMANCE]['w_art'] = match.group(11)
+                        d.ctrla[PERFORMANCE]['w_mrt'] = match.group(12)
+                        d.ctrla[PERFORMANCE]['bsy_time'] = match.group(15)
 
                     elif ctrl_slot is 'b':
 
-                        d.ctrlb[IOCOUNT]['r_success'] = match.group(4)
-                        d.ctrlb[IOCOUNT]['r_blks_xfer'] = match.group(5)
-                        d.ctrlb[PERFORMANCE]['r_art'] = match.group(6)
-                        d.ctrlb[PERFORMANCE]['r_mrt'] = match.group(7)
-                        d.ctrlb[IOCOUNT]['w_success'] = match.group(8)
-                        d.ctrlb[IOCOUNT]['w_blks_xfer'] = match.group(9)
-                        d.ctrlb[PERFORMANCE]['w_art'] = match.group(10)
-                        d.ctrlb[PERFORMANCE]['w_mrt'] = match.group(11)
-                        d.ctrlb[PERFORMANCE]['bsy_time'] = match.group(14)
+                        d.ctrlb[IOCOUNT]['r_success'] = match.group(5)
+                        d.ctrlb[IOCOUNT]['r_blks_xfer'] = match.group(6)
+                        d.ctrlb[PERFORMANCE]['r_art'] = match.group(7)
+                        d.ctrlb[PERFORMANCE]['r_mrt'] = match.group(8)
+                        d.ctrlb[IOCOUNT]['w_success'] = match.group(9)
+                        d.ctrlb[IOCOUNT]['w_blks_xfer'] = match.group(10)
+                        d.ctrlb[PERFORMANCE]['w_art'] = match.group(11)
+                        d.ctrlb[PERFORMANCE]['w_mrt'] = match.group(12)
+                        d.ctrlb[PERFORMANCE]['bsy_time'] = match.group(15)
 
             else:
                 continue
